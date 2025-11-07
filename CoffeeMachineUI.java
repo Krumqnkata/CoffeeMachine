@@ -10,7 +10,6 @@ import java.awt.print.PrinterException;
 import java.io.*;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.awt.event.ActionEvent;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
