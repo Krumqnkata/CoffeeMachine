@@ -512,7 +512,7 @@ public class CoffeeMachineUI {
             int ok = JOptionPane.showConfirmDialog(frame, pf, "Въведете парола за Администратор:", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (ok == JOptionPane.OK_OPTION) {
                 String password = new String(pf.getPassword());
-                if (string.equals(password)) {
+                if ("Adm1n".equals(password)) {
                     isAdmin = true;
                     JOptionPane.showMessageDialog(frame, "Успешен вход като Администратор.", "Админ", JOptionPane.INFORMATION_MESSAGE);
                 } else {
