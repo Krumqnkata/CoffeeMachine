@@ -2,8 +2,6 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-// CoffeeMachineSimulator is in the default package; no import is needed.
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.print.PrinterException;
@@ -17,24 +15,7 @@ import java.util.*;
 import java.util.List;
 import java.text.DecimalFormat;
 
-/**
- * CoffeeMachineUI - Full working version with QR code on receipts.
- *
- * Features:
- * - Left: Menu + Order (regular users)
- * - Right: Inventory, Sales, Console, Admin (admin only)
- * - Admin operations: add/delete/EDIT drinks, set/remove drink images, refill inventory, collect cash
- * - Background image with alpha (admin can set); auto-loads bg_coffee.jpg if present
- * - Payment flow: Cash or Card (Luhn)
- * - Receipt generation (no QR)
- * - Redirects System.out / System.err to embedded console textarea
- * - NEW: Low stock alerts in Inventory tab.
- *
- * Notes:
- * - Make sure CoffeeMachineSimulator.CoffeeMachine and nested classes are present.
- *
- * Merchant on receipt: "ЕТ КРУМ КРУМОВ", address "ул. Стефан Сливков 7, град Стара Загора"
- */
+
 public class CoffeeMachineUI {
 
     private CoffeeMachineSimulator.CoffeeMachine machine;
@@ -48,27 +29,26 @@ public class CoffeeMachineUI {
     private JLabel imageLabel;
     private boolean isAdmin = false;
 
-    // Admin-only buttons
+    
     private JButton adminSetImageBtn;
     private JButton adminRemoveImageBtn;
     private JButton adminAddDrinkBtn;
-    private JButton adminEditDrinkBtn; // *** НОВО ***
+    private JButton adminEditDrinkBtn; 
     private JButton adminDeleteDrinkBtn;
     private JButton adminRefillBtn;
     private JButton adminCollectBtn;
     private JButton adminReportBtn;
     private JButton adminSetBackgroundBtn;
 
-    // Price view (admin only)
     private JButton viewPriceBtn;
 
-    // Tabs / layout
+    
     private JTabbedPane rightTabs;
     private JTabbedPane leftTabs;
     private JSplitPane splitPane;
     private JButton adminLoginBtn;
 
-    // Background panel which draws semi-transparent image
+
     private BackgroundPanel backgroundPanel;
 
     private static final DateTimeFormatter TS_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
