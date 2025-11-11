@@ -61,15 +61,15 @@ public class CoffeeMachineUI {
         // Console for internal logs
         consoleText = new JTextArea();
         consoleText.setEditable(false);
-        consoleText.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        consoleText.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
         redirectSystemStreamsToConsole(consoleText);
 
         // instantiate machine AFTER redirect so logs show up in console area
         machine = new CoffeeMachineSimulator.CoffeeMachine();
 
-        frame = new JFrame("Coffee Machine Simulator - GUI");
+        frame = new JFrame("Coffee Machine Simulator");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1000, 700);
+        frame.setSize(1300, 700);
         frame.setLocationRelativeTo(null);
 
         // Background panel (content pane)
@@ -81,7 +81,7 @@ public class CoffeeMachineUI {
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(new EmptyBorder(8, 8, 8, 8));
         topPanel.setOpaque(false); // show background through
-        JLabel welcome = new JLabel("☕️ Coffee Machine Simulator (GUI)");
+        JLabel welcome = new JLabel("☕️ Кафе Машина Симулатор ☕️");
         topPanel.add(welcome, BorderLayout.WEST);
 
         adminLoginBtn = new JButton("Вход Админ");
@@ -103,7 +103,7 @@ public class CoffeeMachineUI {
         menuListModel = new DefaultListModel<>();
         menuList = new JList<>(menuListModel);
         menuList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        menuList.setBackground(new Color(255, 255, 255, 220));
+        menuList.setBackground(new Color(240, 255, 255, 220));
         menuList.setOpaque(true);
 
         JScrollPane menuScroll = new JScrollPane(menuList);
@@ -140,7 +140,7 @@ public class CoffeeMachineUI {
         // Order tab
         orderList = new JList<>(menuListModel); // Uses the *same* model
         orderList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        orderList.setBackground(new Color(255,255,255,220));
+        orderList.setBackground(new Color(240,255,255,220));
         orderList.setOpaque(true);
         JScrollPane orderScroll = new JScrollPane(orderList);
         orderScroll.setOpaque(false);
@@ -259,7 +259,7 @@ public class CoffeeMachineUI {
         inventoryText = new JTextArea();
         inventoryText.setEditable(false);
         inventoryText.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        inventoryText.setBackground(new Color(255,255,255,220));
+        inventoryText.setBackground(new Color(255,240,255,220));
         inventoryText.setOpaque(true);
         JScrollPane invScroll = new JScrollPane(inventoryText);
         invScroll.setOpaque(false);
@@ -290,8 +290,8 @@ public class CoffeeMachineUI {
         // Sales
         salesText = new JTextArea();
         salesText.setEditable(false);
-        salesText.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        salesText.setBackground(new Color(255,255,255,220));
+        salesText.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
+        salesText.setBackground(new Color(255,240,255,220));
         salesText.setOpaque(true);
         JScrollPane salesScroll = new JScrollPane(salesText);
         salesScroll.setOpaque(false);
@@ -348,7 +348,7 @@ public class CoffeeMachineUI {
         tabs.addTab("Продажби", salesPanel);
 
         // Console
-        consoleText.setBackground(new Color(255,255,255,220));
+        consoleText.setBackground(new Color(255,240,255,220));
         consoleText.setOpaque(true);
         JScrollPane consoleScroll = new JScrollPane(consoleText);
         consoleScroll.setOpaque(false);
