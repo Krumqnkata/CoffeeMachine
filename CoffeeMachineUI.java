@@ -370,7 +370,12 @@ public class CoffeeMachineUI {
         // Admin
         JPanel adminPanel = new JPanel(new BorderLayout());
         adminPanel.setOpaque(false);
-        JPanel adminTop = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        // *** НОВА ПРОМЯНА (Лейаут на Админ панел) ***
+        // Променяме FlowLayout на GridLayout(0, 2), за да подредим 6-те бутона
+        // в 3 реда по 2 колони (0 = auto-rows, 2 = 2 cols, 6,6 = gaps)
+        JPanel adminTop = new JPanel(new GridLayout(0, 2, 6, 6));
+        adminTop.setBorder(new EmptyBorder(5, 5, 5, 5)); // Добавяме малко отстояние
         adminTop.setOpaque(false);
 
         adminAddDrinkBtn = new JButton("Добави напитка");
@@ -442,21 +447,30 @@ public class CoffeeMachineUI {
     }
 
     /**
+     * *** ПРОМЕНЕН МЕТОД (за Точка 2) ***
      * Refresh the menu list model from the simulator's menu.
      * Each entry uses the format: "Name — PRICE лв." so other code can split on " — ".
+     * Вече проверява наличностите и добавя "[ИЗЧЕРПАНО]", ако напитката не може да бъде направена.
      */
     private void refreshMenuList() {
         menuListModel.clear();
         Map<String, CoffeeMachineSimulator.Drink> menu = machine.getMenu();
         List<String> names = new ArrayList<>(menu.keySet());
         Collections.sort(names);
+        
         for (String name : names) {
             CoffeeMachineSimulator.Drink d = menu.get(name);
             if (d != null) {
-                menuListModel.addElement(String.format("%s — %.2f лв.", name, d.getPrice()));
+                // *** НОВА ПРОВЕРКА ***
+                // Използваме Collections.singletonList, за да проверим само за 1 брой от напитката
+                boolean canMake = machine.checkTotalIngredients(Collections.singletonList(name));
+                String statusTag = canMake ? "" : " [ИЗЧЕРПАНО]";
+                
+                menuListModel.addElement(String.format("%s — %.2f лв.%s", name, d.getPrice(), statusTag));
             }
         }
     }
+
 
     /**
      * Show the calculated ingredient cost (себестойност) for the selected drink.
@@ -695,6 +709,9 @@ public class CoffeeMachineUI {
 
     // ---------------- Orders and receipts ----------------
 
+    /**
+     * *** ПРОМЕНЕН МЕТОД (за Точка 4) ***
+     */
     private void handleQuickOrder(JList<String> orderList) {
         List<String> selections = orderList.getSelectedValuesList();
         if (selections.isEmpty()) {
@@ -723,15 +740,14 @@ public class CoffeeMachineUI {
         PaymentResult pay = processPayment(totalCost);
         if (!pay.success) return;
 
-        for (String nm : names) machine.makeSingleDrink(nm);
-
-        showReceipt(names, totalCost, pay);
-
-        writeTransactionToCsv(pay, names, totalCost);
-
-        refreshAllUI();
+        // *** НОВА ПРОМЯНА (за Точка 4) ***
+        // Старите 4 реда са заменени с извикване на новия метод
+        runPreparationAndReceipt(names, totalCost, pay);
     }
 
+    /**
+     * *** ПРОМЕНЕН МЕТОД (за Точка 4) ***
+     */
     private void handleOrderWithQuantities(JList<String> orderList) {
         List<String> selections = orderList.getSelectedValuesList();
         if (selections.isEmpty()) {
@@ -787,14 +803,77 @@ public class CoffeeMachineUI {
         PaymentResult pay = processPayment(totalCost);
         if (!pay.success) return;
 
-        for (String nm : orderedNames) machine.makeSingleDrink(nm);
-
-        showReceipt(orderedNames, totalCost, pay);
-
-        writeTransactionToCsv(pay, orderedNames, totalCost);
-
-        refreshAllUI();
+        // *** НОВА ПРОМЯНА (за Точка 4) ***
+        // Старите 4 реда са заменени с извикване на новия метод
+        runPreparationAndReceipt(orderedNames, totalCost, pay);
     }
+
+    /**
+     * *** НОВ МЕТОД (за Точка 4) ***
+     * Показва "моля изчакайте" диалог, докато симулира приготвянето на напитките във фонов режим.
+     * След приключване, затваря диалога и показва квитанцията.
+     *
+     * @param names Списък с имената на всички поръчани напитки (напр. ["Espresso", "Espresso", "Latte"])
+     * @param totalCost Обща цена на поръчката
+     * @param pay Резултатът от плащането
+     */
+    private void runPreparationAndReceipt(List<String> names, double totalCost, PaymentResult pay) {
+        
+        // 1. Създаване на диалога "Моля изчакайте"
+        final JDialog waitDialog = new JDialog(frame, "Приготвяне...", true); // true = модален
+        JPanel p = new JPanel(new BorderLayout(10, 10));
+        p.setBorder(new EmptyBorder(20, 20, 20, 20));
+        p.add(new JLabel("☕️... напитките се приготвят... Моля изчакайте."), BorderLayout.CENTER);
+        waitDialog.getContentPane().add(p);
+        waitDialog.setSize(350, 120);
+        waitDialog.setLocationRelativeTo(frame);
+        waitDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE); // Потребителят не може да го затвори
+        
+        // 2. Създаване на SwingWorker за фоновата работа
+        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+            
+            @Override
+            protected Void doInBackground() throws Exception {
+                // Симулиране на забавяне
+                long delayPerDrink = 500; // 0.5 секунди на напитка
+                long baseDelay = 1000;    // 1 секунда основа
+                long totalDelay = baseDelay + (names.size() * delayPerDrink);
+                
+                Thread.sleep(totalDelay);
+                
+                // Изпълнение на същинската работа (консумация на инвентар)
+                for (String nm : names) {
+                    machine.makeSingleDrink(nm);
+                }
+                return null; // Не връщаме нищо
+            }
+            
+            @Override
+            protected void done() {
+                // Този код се изпълнява на EDT, СЛЕД като doInBackground() приключи
+                waitDialog.dispose(); // Затваряме диалога "Моля изчакайте"
+                
+                try {
+                    get(); // Проверяваме за грешки от фоновия процес
+                    
+                    // Извикваме останалата част от логиката
+                    showReceipt(names, totalCost, pay);
+                    writeTransactionToCsv(pay, names, totalCost);
+                    refreshAllUI();
+                    
+                } catch (Exception e) {
+                    // Ако има грешка при приготвянето
+                    e.printStackTrace(); // Ще се покаже в конзолата
+                    JOptionPane.showMessageDialog(frame, "Възникна грешка при приготвяне: " + e.getMessage(), "Грешка", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        };
+        
+        // 3. Стартиране на worker-а и показване на диалога
+        worker.execute();
+        waitDialog.setVisible(true); // Това ще блокира, докато worker-ът не извика dispose()
+    }
+
 
     private void showReceipt(List<String> orderedNames, double totalCost, PaymentResult pay) {
         String receipt = generateReceiptText(orderedNames, totalCost, pay);
