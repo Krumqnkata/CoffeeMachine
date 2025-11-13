@@ -766,7 +766,7 @@ public class CoffeeMachineSimulator {
             String command = scanner.nextLine().trim().toLowerCase();
 
             try {
-                switch (command) {
+                 switch (command) {
                     case "меню":
                         machine.displayMenu();
                         break;
